@@ -63,6 +63,10 @@ class JW_Model_Rfc822
     
     protected function _formatOutput()
     {
+        if(!is_array($this->_data)) {
+            return null;
+        }
+        
         foreach($this->_data as $k=>$v) {
             $output .= "{$k}: {$v}\n";
         }
