@@ -18,17 +18,13 @@ class JW_Model_Ingest
         $messages = $this->getAmazonSqs()->ingest();
     
         foreach($messages as $message) {
-            print_r($message);
+            $message->output_format = 'web';;
 
-            $body = json_decode(base64_decode($message['body']));
-            
-            print_r($body);
-        
-            $instance = $this->startInstance($body[0]->permanent);
+            # Start an Amazon EC2 instance to process this message
+            $instance = $this->startInstance((string)$message);
 
             # Put this job on the encode queue
-            $this->getAmazonSqs()->encode($body[0]->permanent);
-
+            $this->getAmazonSqs()->encode((string)$message);
         }
     }
     
