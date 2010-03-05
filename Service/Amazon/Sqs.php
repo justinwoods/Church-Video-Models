@@ -80,7 +80,7 @@ class JW_Service_Amazon_Sqs extends Zend_Service_Amazon_Sqs
     {
         $message = $this->_getSqsMessage();
         $message->addRawData($data);
-        return $message->toString();
+        return $message;
     }
     
     public function __call($name, $arguments)
@@ -103,10 +103,16 @@ class JW_Service_Amazon_Sqs extends Zend_Service_Amazon_Sqs
             return false;
         }
         
-        foreach($messages as $key => $message) {
-            $messages[$key]['body'] = $this->decodeMessage($message['body']);
+        $message_object = $this->_getSqsMessage();
+        $message_objects = array();
+        foreach($messages as $message) {
+            $message_object->clear();
+            $message_object->addRawData	( $message['body'] );
+            $message_object->message_id	= $message['message_id'];
+            $message_object->handle 	= $message['handle'];
+            $message_objects[] = $message_object;
         }
-        return $messages;
+        return $message_objects;
     }
     
     private function _getSqsMessage()

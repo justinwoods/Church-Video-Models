@@ -28,6 +28,11 @@ class JW_Model_Rfc822
         }
     }
     
+    public function clear()
+    {
+        $this->_data = null;
+    }
+    
     public function addData($data, $fieldname = null)
     {
         if(is_array($data)) {
@@ -77,6 +82,11 @@ class JW_Model_Rfc822
         }
         
         $this->addData($value, $name);
+    }
+    
+    public function __get($name)
+    {
+        return $this->_data[$name];
     }
     
     public function toString()
