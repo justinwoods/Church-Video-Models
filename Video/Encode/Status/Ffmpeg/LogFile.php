@@ -66,7 +66,7 @@ class JW_Video_Encode_Status_Ffmpeg_LogFile
     
     public function getTimeElapsed()
     {
-        return (time() - $this->getStartTimestamp());
+        return (filemtime($this->getFilename()) - $this->getStartTimestamp());
     }
     
     public function getFps()

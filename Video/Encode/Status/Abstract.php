@@ -29,12 +29,19 @@ class JW_Video_Encode_Status_Abstract
     
     public function getTimeRemaining()
     {
+        if(0 === $this->getRemainingFrames()) {
+            return 0;
+        }
         $remaining = ($this->getRemainingFrames() / $this->getLogFileObject()->getFps());
         return floor($remaining);
     }
     
     public function getPercentComplete()
     {
+        if(JW_Video_Encode_Status_Ffmpeg_LogFile::STATUS_FINISHED === $this->getLogFileObject()->getStatus()) {
+            return 100;
+        }
+        
         $percent = ($this->getLogFileObject()->getFrame() / $this->getTotalFrames()) * 100;
         return round($percent, 2);
     }
