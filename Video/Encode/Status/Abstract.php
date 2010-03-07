@@ -33,6 +33,10 @@ class JW_Video_Encode_Status_Abstract
             return 0;
         }
 
+        if(0 == $this->getLogFileObject()->getFps()) {
+            return 0;
+        }
+
         $remaining = ($this->getRemainingFrames() / $this->getLogFileObject()->getFps());
         return floor($remaining);
     }

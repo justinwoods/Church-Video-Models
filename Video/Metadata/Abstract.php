@@ -7,7 +7,7 @@ class JW_Video_Metadata_Abstract
 
     private $_valid_fields = array(
         'duration', 'frame_count', 'frame_rate', 'filename', 'comment',
-        'title', 'author', 'copyright', 'frame_height', 'frame_width',
+        'title', 'author', 'copyright', 'width', 'height',
         'pixel_format', 'bitrate', 'video_bitrate', 'audio_bitate',
         'audio_sample_rate', 'video_codec', 'audio_codec', 'audio_channels',
         'has_audio', 'has_video'
