@@ -29,9 +29,10 @@ class JW_Video_Encode_Status_Abstract
     
     public function getTimeRemaining()
     {
-        if(0 === $this->getRemainingFrames()) {
+        if(0 == $this->getRemainingFrames()) {
             return 0;
         }
+
         $remaining = ($this->getRemainingFrames() / $this->getLogFileObject()->getFps());
         return floor($remaining);
     }

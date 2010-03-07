@@ -55,11 +55,16 @@ class JW_Video_Encode_Status_Ffmpeg_LogFile
     public function getStartTimestamp()
     {
         if(null === $this->_start_timestamp) {
-            $line = $this->getFirstLine();
-            if(!is_numeric($line)) {
-                throw new Exception("JW_Video_Encode_Status_Ffmpeg_LogFile: File {$filename} must have a UNIX timestamp as the first line.");
+            $file = $this->getFilename();
+            $number = trim(substr($file, strrpos($file, '.') + 1));
+
+            if(!is_numeric($number)) {
+                throw new Exception("JW_Video_Encode_Status_Ffmpeg_LogFile: File {$filename} must have a UNIX timestamp as the file extension.");
             }
-            $this->_start_timestamp = $line;
+            if(1267900000 > $number) {
+                throw new Exception("JW_Video_Encode_Status_Ffmpeg_LogFile: File {$filename} must have a UNIX timestamp as the file extension.");
+            }
+            $this->_start_timestamp = $number;
         }
         return $this->_start_timestamp;
     }
