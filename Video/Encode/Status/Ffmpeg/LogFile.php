@@ -129,5 +129,23 @@ class JW_Video_Encode_Status_Ffmpeg_LogFile
     	fclose($fp);
     	return trim($line);
     }
+    
+    public function getInputMediaFile() 
+    {
+        $i = 0;
+        $pattern = '/^Input.*from\h\'(.*)\':/';
+        $fp = fopen($this->getFilename(), 'r');
+        while(!feof($fp)) {
+            $line = fgets($fp);
+            if(preg_match($pattern, $line, $matches)) {
+                return $matches[1];
+            }
+            if($i++ == 50) {
+                break;
+            }
+            
+        }
+        return null;
+    }
 
 }

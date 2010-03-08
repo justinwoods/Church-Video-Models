@@ -61,6 +61,10 @@ class JW_Video_Encode_Status_Abstract
         }
 
         $this->_filename = $filename;
+
+        $this->getMetadataObject()->setFilename(
+            $this->getLogFileObject()->getInputMediaFile()
+        );
     }
     
     public function getFilename()

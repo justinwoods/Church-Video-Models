@@ -19,7 +19,6 @@ class JW_Video_Encode_Status_Ffmpeg extends JW_Video_Encode_Status_Abstract
         'percent_complete'	=> 'getPercentComplete'
     );
     
-    
     public function setMetadataObject($metadata_object)
     {
         if(!is_a($metadata_object, 'JW_Video_Metadata_Abstract')) {
@@ -65,13 +64,6 @@ class JW_Video_Encode_Status_Ffmpeg extends JW_Video_Encode_Status_Abstract
             $this->_logfile_object = new JW_Video_Encode_Status_Ffmpeg_LogFile($this->getFilename());
         }
         return $this->_logfile_object;
-    }
-    
-    public function setLogFilename($filename)
-    {
-        parent::setFilename($filename);
-        $this->_logfile_object = null;
-        $this->getLogFileObject();
     }
     
     public function getMetadataObject()
