@@ -27,7 +27,7 @@ abstract class JW_Video_Encode_Abstract
     
     protected function _getCommand()
     {
-        $encoder = $this->getConfig()->video->encode->path->ffmpeg;
+        $encoder = $this->_config['video']['encode']['path']['ffmpeg'];
 
         $command = 
             "{$encoder} -v 2 -y -i {$this->getInputFile()} -async 10000 ".
@@ -35,7 +35,7 @@ abstract class JW_Video_Encode_Abstract
             "{$this->_getBitrateSettings()} {$this->_getPaddingSettings()} ".
             "{$this->getOutputFile()} ".
             "&>{$this->getMonitorFile()}";
-             
+        
         return $command;
     }
     
@@ -52,7 +52,7 @@ abstract class JW_Video_Encode_Abstract
     
     private function _getPaddingSettings()
     {
-        if(0 == $this->getPadding()) {
+        if(0 >= $this->getPadding()) {
             return '';
         }
         
@@ -72,6 +72,7 @@ abstract class JW_Video_Encode_Abstract
         if(0 == ($this->getPadding() % 2)) {
             return ($this->getPadding() / 2);
         }
+        
         return floor(($this->getPadding() / 2)) + 1;
     }
     
@@ -87,7 +88,7 @@ abstract class JW_Video_Encode_Abstract
         $unpadded_height = round((($height * $this->getWidth()) / $width), 0);
         $padding = ($this->getHeight() - $unpadded_height);
         
-        return $this->_padding = $padding;
+        return max(($this->_padding = $padding), 0);
     }
     
     public function getMetadata()
@@ -182,7 +183,7 @@ abstract class JW_Video_Encode_Abstract
     
     public function setInputFile($filename)
     {
-        $path = $this->getConfig()->video->encode->path->input;
+        $path = $this->_config['video']['encode']['path']['input'];
         $file = "{$path}/{$filename}";
         
         if(!file_exists($file)) {
@@ -206,7 +207,7 @@ abstract class JW_Video_Encode_Abstract
     
     public function setOutputFile($filename)
     {
-        $path = $this->getConfig()->video->encode->path->output;
+        $path = $this->_config['video']['encode']['path']['output'];
         
         if(!file_exists($path)) {
             throw new Exception("JW_Video_Encode_Abstract::setOutputFile(): {$path} does not exist.");
@@ -233,7 +234,7 @@ abstract class JW_Video_Encode_Abstract
     
     public function setMonitorFile($filename)
     {
-        $path = $this->getConfig()->video->encode->path->monitor;
+        $path = $this->_config['video']['encode']['path']['monitor'];
         
         if(!file_exists($path)) {
             throw new Exception("JW_Video_Encode_Abstract::setMonitorFile(): {$path} does not exist.");
@@ -260,10 +261,6 @@ abstract class JW_Video_Encode_Abstract
     
     public function setConfig($config)
     {
-        if(!is_a($config, 'Zend_Config')) {
-            throw new Exception('JW_Video_Encode_Abstract::__construct(): $config must be an instance of Zend_Config.');
-        }
-        
         $this->_config = $config;
     }
     
