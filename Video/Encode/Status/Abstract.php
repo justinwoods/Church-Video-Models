@@ -19,7 +19,7 @@ class JW_Video_Encode_Status_Abstract
     
     public function getTotalFrames()
     {
-        return $this->getMetadataObject()->frame_count;
+        return $this->getLogFileObject()->getFrameCount();
     }
     
     public function getRemainingFrames()
@@ -62,9 +62,6 @@ class JW_Video_Encode_Status_Abstract
 
         $this->_filename = $filename;
 
-        $this->getMetadataObject()->setFilename(
-            $this->getLogFileObject()->getInputMediaFile()
-        );
     }
     
     public function getFilename()

@@ -4,7 +4,6 @@ class JW_Video_Encode_Status_Ffmpeg extends JW_Video_Encode_Status_Abstract
 {
 
     private $_logfile_object = null;
-    private $_metadata_object = null;
     
     private $_logfile_fields	= array(
         'status'		=> 'getStatus',
@@ -19,14 +18,6 @@ class JW_Video_Encode_Status_Ffmpeg extends JW_Video_Encode_Status_Abstract
         'percent_complete'	=> 'getPercentComplete'
     );
     
-    public function setMetadataObject($metadata_object)
-    {
-        if(!is_a($metadata_object, 'JW_Video_Metadata_Abstract')) {
-            throw new Exception('JW_Video_Encode_Status_Ffmpeg: $metadata_object must be an instance of JW_Video_Metadata_Abstract.');
-        }
-        $this->_metadata_object = $metadata_object;
-    }
-
     public function __get($name)
     {
         parent::__get($name);
@@ -66,9 +57,4 @@ class JW_Video_Encode_Status_Ffmpeg extends JW_Video_Encode_Status_Abstract
         return $this->_logfile_object;
     }
     
-    public function getMetadataObject()
-    {
-        return $this->_metadata_object;
-    }
-
 }

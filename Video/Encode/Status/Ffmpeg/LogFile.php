@@ -3,13 +3,15 @@
 class JW_Video_Encode_Status_Ffmpeg_LogFile
 {
 
-    const DELIMITER 	= 'frame=';
     const TRIES		= 10;
     
+    const STATUS_STARTING = 'STARTING';
     const STATUS_ENCODING = 'ENCODING';
     const STATUS_FINISHED = 'FINISHED';
+    const STATUS_ERROR    = 'ERROR';
 
     private $_filename		= null;
+    private $_tail		= null;
     private $_current_frame	= null;
     private $_start_timestamp	= null;
     private $_total_frames	= null;
@@ -41,13 +43,33 @@ class JW_Video_Encode_Status_Ffmpeg_LogFile
 
     public function getStatus()
     {
-        return (is_numeric($this->getFrame())) ? self::STATUS_ENCODING : self::STATUS_FINISHED;
+        $lines = $this->tail();
+        
+        foreach($lines as $num=>$line) {
+            $pattern = '/^.*frame=\h*([0-9]+)/';
+            $result = preg_match($pattern, $line, $matches);
+
+            if(is_numeric($matches[1])) {
+                $this->_current_frame = trim($matches[1]);
+                
+                if($num == 0) {
+                    return self::STATUS_ENCODING;
+                }
+                
+                if($this->_current_frame < ($this->getFrameCount() - 10)) {
+                    return self::STATUS_ERROR;
+                }
+                
+                return self::STATUS_FINISHED;
+            }
+        }
+        return self::STATUS_STARTING;
     }
 
     public function getFrame()
     {
         if(null === $this->_current_frame) {
-            $this->_current_frame = $this->_getFrame();
+            $this->getStatus();
         }
         return $this->_current_frame;
     }
@@ -79,66 +101,66 @@ class JW_Video_Encode_Status_Ffmpeg_LogFile
         return floor($this->getFrame() / $this->getTimeElapsed());
     }
     
-    public function update()
-    {
-        $this->_current_frame = null;
-        $this->getFrame();
-    }
-    
-    private function _getFrame()
-    {
-        $i = 0;
-        while($i < self::TRIES) {
-            while(null == ($status = $this->getLastLine())) {}
-            
-            $pattern = '/'.self::DELIMITER.'\h?([0-9]+)/';
-            $result = preg_match($pattern, $status, $matches);
-            
-            if(is_numeric($matches[1])) {
-                return trim($matches[1]);
-            }
-            
-            $i++;
-        }
-    }
-    
     private function getLastLine()
     {
-    	$fp = fopen($this->getFilename(), 'r');
-	$begining = fseek($fp, 0);      
-	$pos = -1;
-	$t = " ";
-	
-	while ($t != "\r") {
-	    fseek($fp, $pos, SEEK_END);
-	    if(ftell($fp) == $begining){
-                break;
-            }
-            $t = fgetc($fp);
-            $pos = $pos - 1;
-        }
-        $t = fgets($fp);
-        fclose($fp);
-        return $t;
-    }
-
-    private function getFirstLine()
-    {
-    	$fp = fopen($this->getFilename(), 'r');
-    	$line = fgets($fp);
-    	fclose($fp);
-    	return trim($line);
+        $tail = $this->tail();
+        return $tail[0];
     }
     
+    private function tail()
+    {
+        if(null === $this->_tail) {
+            $fp = fopen($this->getFilename(), 'r');
+            fseek($fp, -2000, SEEK_END);
+            $data = trim(fread($fp, 2000));
+            $this->_tail = array_reverse(explode("\n",$data));
+        }
+        return $this->_tail;
+    }
+
     public function getInputMediaFile() 
     {
-        $i = 0;
         $pattern = '/^Input.*from\h\'(.*)\':/';
+        $matches = $this->_getDataByRegex($pattern);
+        return $matches[1];
+    }
+
+    public function getOutputMediaFile() 
+    {
+        $pattern = '/^Output.*from\h\'(.*)\':/';
+        $matches = $this->_getDataByRegex($pattern);
+        return $matches[1];
+    }
+    
+    public function getDuration()
+    {
+        $pattern = '/^\h*Duration:\h*([0-9:.]*)/';
+        $matches = $this->_getDataByRegex($pattern);
+        list($hours, $minutes, $seconds) = explode(':', $matches[1]);
+        $duration = ($hours * 3600) + ($minutes * 60) + $seconds;
+        return $duration;
+    }
+    
+    public function getFrameRate()
+    {
+        $pattern = '/^\h*Stream #.*Video:.*,\h([0-9.]*)\htbr/';
+        $matches = $this->_getDataByRegex($pattern);
+        return $matches[1];
+    }
+    
+    public function getFrameCount()
+    {
+        return round(($this->getDuration() * $this->getFrameRate()));
+    }
+    
+    private function _getDataByRegex($pattern)
+    {
+        $i = 0;
         $fp = fopen($this->getFilename(), 'r');
         while(!feof($fp)) {
             $line = fgets($fp);
             if(preg_match($pattern, $line, $matches)) {
-                return $matches[1];
+                return $matches;
             }
             if($i++ == 50) {
                 break;
