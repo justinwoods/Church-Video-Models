@@ -1,6 +1,6 @@
 <?php
 
-class JW_Video_Encode_Status_Ffmpeg_LogFile
+class JW_Video_Job_Status_Ffmpeg_LogFile
 {
 
     const TRIES		= 10;
@@ -81,10 +81,10 @@ class JW_Video_Encode_Status_Ffmpeg_LogFile
             $number = trim(substr($file, strrpos($file, '.') + 1));
 
             if(!is_numeric($number)) {
-                throw new Exception("JW_Video_Encode_Status_Ffmpeg_LogFile: File {$filename} must have a UNIX timestamp as the file extension.");
+                throw new Exception("JW_Video_Job_Status_Ffmpeg_LogFile: File {$filename} must have a UNIX timestamp as the file extension.");
             }
             if(1267900000 > $number) {
-                throw new Exception("JW_Video_Encode_Status_Ffmpeg_LogFile: File {$filename} must have a UNIX timestamp as the file extension.");
+                throw new Exception("JW_Video_Job_Status_Ffmpeg_LogFile: File {$filename} must have a UNIX timestamp as the file extension.");
             }
             $this->_start_timestamp = $number;
         }

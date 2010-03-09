@@ -1,6 +1,6 @@
 <?php
 
-class JW_Video_Encode_Status_Ffmpeg extends JW_Video_Encode_Status_Abstract
+class JW_Video_Job_Status_Ffmpeg extends JW_Video_Job_Status_Abstract
 {
 
     private $_logfile_object = null;
@@ -52,7 +52,7 @@ class JW_Video_Encode_Status_Ffmpeg extends JW_Video_Encode_Status_Abstract
         }
 
         if(null === $this->_logfile_object) {
-            $this->_logfile_object = new JW_Video_Encode_Status_Ffmpeg_LogFile($this->getFilename());
+            $this->_logfile_object = new JW_Video_Job_Status_Ffmpeg_LogFile($this->getFilename());
         }
         return $this->_logfile_object;
     }

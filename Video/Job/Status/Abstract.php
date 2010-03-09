@@ -1,6 +1,6 @@
 <?php
 
-class JW_Video_Encode_Status_Abstract
+class JW_Video_Job_Status_Abstract
 {
     
     protected $_filename = null;
@@ -13,7 +13,7 @@ class JW_Video_Encode_Status_Abstract
     public function __get($name)
     {
         if(!in_array($name, $this->_valid_fields)) {
-            throw new Exception("JW_Video_Encode_Status_Abstract: {$name} is not a valid field.");
+            throw new Exception("JW_Video_Job_Status_Abstract: {$name} is not a valid field.");
         }
     }
     
@@ -43,7 +43,7 @@ class JW_Video_Encode_Status_Abstract
     
     public function getPercentComplete()
     {
-        if(JW_Video_Encode_Status_Ffmpeg_LogFile::STATUS_FINISHED === $this->getLogFileObject()->getStatus()) {
+        if(JW_Video_Job_Status_Ffmpeg_LogFile::STATUS_FINISHED === $this->getLogFileObject()->getStatus()) {
             return 100;
         }
         
@@ -54,10 +54,10 @@ class JW_Video_Encode_Status_Abstract
     public function setFilename($filename)
     {
         if(!file_exists($filename)) {
-            throw new Exception("JW_Video_Encode_Status_Abstract: File {$filename} does not exist.");
+            throw new Exception("JW_Video_Job_Status_Abstract: File {$filename} does not exist.");
         }
         if(!is_readable($filename)) {
-            throw new Exception("JW_Video_Encode_Status_Abstract: File {$filename} is not readable.");
+            throw new Exception("JW_Video_Job_Status_Abstract: File {$filename} is not readable.");
         }
 
         $this->_filename = $filename;
