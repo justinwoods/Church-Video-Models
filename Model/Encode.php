@@ -6,6 +6,7 @@ class JW_Model_Encode
     private $_sqs		= null;
     private $_config		= null;
     private $_job_message	= null;
+    private $_cluster_jobs	= null;
     
     public function __construct($config, $sqs, $s3)
     {
@@ -19,22 +20,29 @@ class JW_Model_Encode
     
     public function doJob() 
     {
-        $e = JW_Video_Encode::factory(JW_Video_Encode::ENCODE_TYPE_WEB, $this->getConfig());
-        $e->setFile(basename($this->getJob()->permanentFilename));
-        $e->setMonitorMetadata($this->getJob()->toArray());
+        if(null === ($job = $this->getJob())) {
+            throw new Exception('JW_Model_Encode::doJob(): No job');
+        }
+    
+        $e = JW_Video_Encode::factory($job->output_format, $this->getConfig());
+        $e->setFile(basename($job->permanentFilename));
+        $e->setMonitorMetadata($job->toArray());
         echo $e->getCommand();
     }
     
     public function getMedia()
     {
-        $job = $this->getJob();
+        if(null === ($job = $this->getJob())) {
+            throw new Exception('JW_Model_Encode::getMedia(): No job');
+        }
+    
         $config = $this->getConfig();
-        
+
         $response = $this->getAmazonS3()->getObjectStream(
             $job->permanentFilename,
             $config['video']['encode']['path']['input'].'/'.basename($job->permanentFilename)
         );
-        
+
         if(false == $response) {
             throw new Exception("JW_Model_Encode::getMedia(): Error downloading {$job->permanentFilename}");
         }
@@ -48,10 +56,15 @@ class JW_Model_Encode
     
         $i = 0;
         while(true) {
-            $job = $this->getAmazonSqs()->encode();
+            list($job) = $this->getAmazonSqs()->encode();
 
             if(count($job) > 0) {
-                $this->_job_message = $job[0];
+  
+                if(count($this->getClusterJobs()->getJobByMessageId($job->message_id)) > 0) {
+                    continue;
+                }
+
+                $this->_job_message = $job;
                 return $this->_job_message;
             }
 
@@ -91,6 +104,14 @@ class JW_Model_Encode
     public function getAmazonS3()
     {
         return $this->_s3;
+    }
+    
+    public function getClusterJobs()
+    {
+        if(null === $this->_cluster_jobs) {
+            $this->_cluster_jobs = new JW_Video_Cluster_Jobs($this->getConfig());
+        }
+        return $this->_cluster_jobs;
     }
 
 }

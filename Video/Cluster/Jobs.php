@@ -26,10 +26,15 @@ class JW_Video_Cluster_Jobs
             return array();
         }
         
+        $jobs = array();
         foreach($instances as $num=>$instance) {
-            $instances[$num]['jobs'] = $this->getServerJobs($instance['dnsName']);
+            $server_jobs = $this->getServerJobs($instance['dnsName']);
+            foreach($server_jobs as $job_num=>$job) {
+                $server_jobs[$job_num]['server'] = $instance['dnsName'];
+            }
+            $jobs = array_merge($jobs, $server_jobs);
         }
-        return $instances;
+        return $jobs;
     }
     
     public function getServerJobs($hostname)
@@ -52,6 +57,23 @@ class JW_Video_Cluster_Jobs
         $url = "http://{$hostname}/api/{$job}";
         $data = json_decode(file_get_contents($url));
         return (array) $data;
+    }
+    
+    public function findJobs($key, $value)
+    {
+        $jobs = $this->getJobs();
+
+        foreach($jobs as $job) {
+            if($job[$key] == $value) {
+                $matches[] = $job;
+            }
+        }
+        return $matches;
+    }
+    
+    public function getJobByMessageId($message_id)
+    {
+        return $this->findJobs('message_id', $message_id);
     }
     
     public function getAmazonEc2()

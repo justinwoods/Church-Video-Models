@@ -48,8 +48,15 @@ class JW_Video_Job_Status_Ffmpeg
     
     public function getAll()
     {
+        $data = array();
         foreach($this->_fields as $name=>$method) {
-            $data[$name] = $this->{$name};
+            $value = $this->{$name};
+            if(is_array($value)) {
+                $data = array_merge($data, $value);
+            }
+            else {
+                $data[$name] = $value;
+            }
         }
         return $data;
     }
