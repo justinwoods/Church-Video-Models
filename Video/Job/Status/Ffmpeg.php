@@ -15,6 +15,7 @@ class JW_Video_Job_Status_Ffmpeg
     private $_total_frames	= null;
 
     private $_fields = array(
+        'job_name'		=> 'getJobName',
         'status'		=> 'getStatus',
         'current_frame'		=> 'getFrame',
         'frames_per_second'	=> 'getFps',
@@ -67,6 +68,11 @@ class JW_Video_Job_Status_Ffmpeg
     public function getFilename()
     {
         return $this->_filename;
+    }
+    
+    public function getJobName()
+    {
+        return basename($this->getFilename());
     }
 
     public function getStatus()

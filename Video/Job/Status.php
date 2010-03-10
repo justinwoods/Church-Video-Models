@@ -15,7 +15,7 @@ class JW_Video_Job_Status
     public function getJobList($monitor_path)
     {
         if(!file_exists($monitor_path)) {
-            throw new Exception("JW_Video_Job_Status::getJobList(): {$path} does not exists.");
+            throw new Exception("JW_Video_Job_Status::getJobList(): {$path} does not exist.");
         }
         if(!is_readable($monitor_path)) {
             throw new Exception("JW_Video_Job_Status::getJobList(): {$path} is not readable.");
