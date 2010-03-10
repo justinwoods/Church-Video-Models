@@ -7,12 +7,15 @@ class JW_Video_Job_Status_Ffmpeg
     const STATUS_ENCODING = 'ENCODING';
     const STATUS_FINISHED = 'FINISHED';
     const STATUS_ERROR    = 'ERROR';
+    
+    const METADATA_DELIMITER = "\n--END METADATA--\n";
 
     private $_filename		= null;
     private $_tail		= null;
     private $_current_frame	= null;
     private $_start_timestamp	= null;
     private $_total_frames	= null;
+    private $_metadata		= null;
 
     private $_fields = array(
         'job_name'		=> 'getJobName',
@@ -22,7 +25,8 @@ class JW_Video_Job_Status_Ffmpeg
         'start_timestamp'	=> 'getStartTimestamp',
         'time_elapsed' 		=> 'getTimeElapsed',
         'time_remaining' 	=> 'getTimeRemaining',
-        'percent_complete'	=> 'getPercentComplete'
+        'percent_complete'	=> 'getPercentComplete',
+        'metadata'		=> 'getMetadata'
     );
     
     public function __construct($filename = null)
@@ -175,6 +179,16 @@ class JW_Video_Job_Status_Ffmpeg
         return $tail[0];
     }
     
+    public function getMetadata()
+    {
+        if(null === $this->_metadata) {
+            $formatter = new JW_Model_Rfc822;
+            $formatter->addRawData($this->_getMetadata());
+            $this->_metadata = $formatter->toArray();
+        }
+        return $this->_metadata;
+    }
+
     private function tail()
     {
         if(null === $this->_tail) {
@@ -237,5 +251,20 @@ class JW_Video_Job_Status_Ffmpeg
         }
         return null;
     }
+    
+    private function _getMetadata()
+    {
+        $i = 0;
+        $fp = fopen($this->getFilename(), 'r');
+        while(!feof($fp)) {
+            $line = fgets($fp);
+            if((false !== strpos($line, trim(self::METADATA_DELIMITER))) || ($i++ === 50)) {
+                break;
+            }
+            $lines[] = $line;
+        }
+        return implode('', $lines);
+    }
+    
 
 }

@@ -21,6 +21,11 @@ class JW_Video_Cluster_Jobs
     public function getJobs()
     {
         $instances = $this->getServers();
+        
+        if(!is_array($instances)) {
+            return array();
+        }
+        
         foreach($instances as $num=>$instance) {
             $instances[$num]['jobs'] = $this->getServerJobs($instance['dnsName']);
         }
@@ -31,6 +36,11 @@ class JW_Video_Cluster_Jobs
     {
         $url = "http://{$hostname}/api/";
         $jobs = json_decode(file_get_contents($url));
+        
+        if(!is_array($jobs)) {
+            return array();
+        }
+        
         foreach($jobs as $job) {
             $list[] = $this->getJob($hostname, $job);
         }

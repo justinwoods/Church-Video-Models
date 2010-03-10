@@ -10,6 +10,7 @@ abstract class JW_Video_Encode_Abstract
     private $_input_file	= null;
     private $_output_file	= null;
     private $_monitor_file	= null;
+    private $_monitor_metadata	= null;
     private $_padding		= null;
     
     private $_metadata		= null;
@@ -30,11 +31,14 @@ abstract class JW_Video_Encode_Abstract
         $encoder = $this->_config['video']['encode']['path']['ffmpeg'];
 
         $command = 
+            "echo '{$this->getMonitorMetadata()}".
+            JW_Video_Job_Status_Ffmpeg::METADATA_DELIMITER.
+            "' > {$this->getMonitorFile()};".
             "{$encoder} -v 2 -y -i {$this->getInputFile()} -async 10000 ".
             "{$this->_getEncoderSettings()} {$this->_getSizeSettings()} ".
             "{$this->_getBitrateSettings()} {$this->_getPaddingSettings()} ".
             "{$this->getOutputFile()} ".
-            "&>{$this->getMonitorFile()}";
+            "&>>{$this->getMonitorFile()};";
         
         return $command;
     }
@@ -257,6 +261,18 @@ abstract class JW_Video_Encode_Abstract
             throw new Exception("JW_Video_Encode_Abstract::getMonitorFile(): Monitor file is not set.");
         }
         return $this->_monitor_file;
+    }
+    
+    public function setMonitorMetadata($data)
+    {
+        $this->_monitor_metadata = $data;
+    }
+    
+    public function getMonitorMetadata()
+    {
+        $formatter = new JW_Model_Rfc822;
+        $formatter->addData($this->_monitor_metadata);
+        return (string) $formatter;
     }
     
     public function setConfig($config)

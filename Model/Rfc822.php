@@ -16,7 +16,7 @@ class JW_Model_Rfc822
     protected function _addRawData($raw_data)
     {
         if(!is_string($raw_data)) {
-            throw new Exception("JW_Model_Rfc822::addData(): Fieldname must be a string.");
+            throw new Exception("JW_Model_Rfc822::_addRawData(): Fieldname must be a string.");
         }
         
         $lines = explode("\n", trim($raw_data));
@@ -35,6 +35,10 @@ class JW_Model_Rfc822
     
     public function addData($data, $fieldname = null)
     {
+        if(is_object($data)) {
+            $data = (array) $data;
+        }
+
         if(is_array($data)) {
             foreach($data as $k=>$v) {
                 $this->_data[$this->_clean($k)] = $this->_clean($v);
@@ -64,7 +68,7 @@ class JW_Model_Rfc822
     protected function _formatOutput()
     {
         if(!is_array($this->_data)) {
-            return null;
+            return '';
         }
         
         foreach($this->_data as $k=>$v) {

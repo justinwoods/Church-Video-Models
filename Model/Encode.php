@@ -21,6 +21,7 @@ class JW_Model_Encode
     {
         $e = JW_Video_Encode::factory(JW_Video_Encode::ENCODE_TYPE_WEB, $this->getConfig());
         $e->setFile(basename($this->getJob()->permanentFilename));
+        $e->setMonitorMetadata($this->getJob()->toArray());
         echo $e->getCommand();
     }
     
