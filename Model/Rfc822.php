@@ -45,13 +45,10 @@ class JW_Model_Rfc822
             }
         }
         elseif(is_scalar($data)) {
-            if(!is_null($fieldname) && !is_string($fieldname)) {
+            if(null === $fieldname) {
                 throw new Exception("JW_Model_Rfc822::addData(): Fieldname must be a string.");
             }
     
-            if((null === $fieldname)) {
-                $fieldname = $this->_prefix.$this->_num++;
-            }
             $this->_data[$this->_clean($fieldname)] = $this->_clean($data);
         }
     }

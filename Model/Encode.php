@@ -29,7 +29,9 @@ class JW_Model_Encode
         $e->setMonitorMetadata($job->toArray());
         $command = $e->getCommand();
 
-        $this->getAmazonSQS()->log($command);
+echo $command;
+
+#        $this->getAmazonSQS()->log($command);
         
         $output = exec($command);
     }
