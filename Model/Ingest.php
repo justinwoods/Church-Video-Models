@@ -21,10 +21,10 @@ class JW_Model_Ingest
             $message->output_format = 'web';;
 
             # Start an Amazon EC2 instance to process this message
-            $instance = $this->startInstance((string)$message);
+#            $instance = $this->startInstance((string)$message);
 
             # Put this job on the encode queue
-            $this->getAmazonSqs()->encode((string)$message);
+            $this->getAmazonSqs()->encode($message);
         }
     }
     

@@ -35,6 +35,10 @@ class JW_Model_Rfc822
     
     public function addData($data, $fieldname = null)
     {
+        if($data instanceof JW_Model_Rfc822) {
+            $data = $data->toArray();
+        }
+    
         if(is_object($data)) {
             $data = (array) $data;
         }
@@ -45,8 +49,9 @@ class JW_Model_Rfc822
             }
         }
         elseif(is_scalar($data)) {
+        
             if(null === $fieldname) {
-                throw new Exception("JW_Model_Rfc822::addData(): Fieldname must be a string.");
+                throw new Exception("JW_Model_Rfc822::addData(): Fieldname must be a string. [Data: '{$data}']");
             }
     
             $this->_data[$this->_clean($fieldname)] = $this->_clean($data);
