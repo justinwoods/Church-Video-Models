@@ -27,7 +27,27 @@ class JW_Model_Encode
         $e = JW_Video_Encode::factory($job->output_format, $this->getConfig());
         $e->setFile(basename($job->permanentFilename));
         $e->setMonitorMetadata($job->toArray());
-        echo $e->getCommand();
+        $command = $e->getCommand();
+
+        $this->getAmazonSQS()->log($command);
+        
+        $output = exec($command);
+    }
+    
+    public function putMedia()
+    {
+        $config = $this->getConfig();
+        $job = $this->getJob();
+
+        $response = $this->getAmazonS3()->putFileStream(
+            $config['video']['encode']['path']['output'].'/'.basename($job->permanentFilename),
+            'church-video-encoded/blah.mov'
+        );
+
+        if(false == $response) {
+            throw new Exception("JW_Model_Encode::putMedia(): Error uploading {$job->permanentFilename}");
+        }
+    
     }
     
     public function getMedia()
@@ -57,10 +77,16 @@ class JW_Model_Encode
         $i = 0;
         while(true) {
             list($job) = $this->getAmazonSqs()->encode();
-
+            
             if(count($job) > 0) {
   
+                # Check whether the job is already being processed elsewhere
                 if(count($this->getClusterJobs()->getJobByMessageId($job->message_id)) > 0) {
+                    continue;
+                }
+                
+                # Check whether output file is already complete and in permanent storage
+                if($this->getAmazonS3()->isObjectAvailable('')) {
                     continue;
                 }
 
@@ -74,6 +100,14 @@ class JW_Model_Encode
             sleep(1);
         }
         
+    }
+    
+    public function deleteJob()
+    {
+        $this->getAmazonSqs()->deleteMessage(
+            $this->getAmazonSqs()->getUrl('encode'),
+            $this->getJob()->handle
+        );
     }
     
     public function setConfig($config)

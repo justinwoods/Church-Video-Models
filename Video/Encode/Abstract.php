@@ -35,9 +35,8 @@ abstract class JW_Video_Encode_Abstract
             JW_Video_Job_Status_Ffmpeg::METADATA_DELIMITER.
             "' > {$this->getMonitorFile()};".
             "{$encoder} -v 2 -y -i {$this->getInputFile()} -async 10000 ".
-            "{$this->_getEncoderSettings()} {$this->_getSizeSettings()} ".
-            "{$this->_getBitrateSettings()} {$this->_getPaddingSettings()} ".
-            "{$this->getOutputFile()} ".
+            "{$this->_getEncoderSettings()} {$this->getOutputDimensions()} ".
+            "{$this->_getBitrateSettings()} {$this->getOutputFile()} ".
             "&>>{$this->getMonitorFile()};";
         
         return $command;
@@ -50,7 +49,6 @@ abstract class JW_Video_Encode_Abstract
     
     private function _getSizeSettings()
     {
-        $height = $this->getHeight() - $this->getPadding();
         return "-s {$this->getWidth()}x{$height}";
     }
     
@@ -63,36 +61,53 @@ abstract class JW_Video_Encode_Abstract
         return "-padtop {$this->getPaddingTop()} -padbottom {$this->getPaddingBottom()} -padcolor 000000";
     }
     
-    public function getPaddingTop()
+    public function getOutputDimensions()
     {
-        if(0 == ($this->getPadding() % 2)) {
-            return ($this->getPadding() / 2);
-        }
-        return floor(($this->getPadding() / 2));
-    }
+	$target_width  = $this->getWidth();
+	$target_height = $this->getHeight();
 
-    public function getPaddingBottom()
-    {
-        if(0 == ($this->getPadding() % 2)) {
-            return ($this->getPadding() / 2);
+	$original_width  = $this->getMetadata()->width;
+	$original_height = $this->getMetadata()->height;
+
+        $padding = array();
+        $aspect = $target_width / $target_height;
+        
+        if($original_width/$original_height !== $aspect)
+        {
+            // Aspect ratio is different
+            if($original_width/$original_height > $aspect)
+            {
+                // Width is the greater of the two dimensions relative to the target dimensions
+                // Calculate height from width
+                $original_height = round($original_height / $original_width * $target_width);
+                $original_width = $target_width;
+                
+                $dif = round(($target_height - $original_height) / 2);
+                $padding['padtop'] = $dif;
+                $padding['padbottom'] = $dif;
+                
+                $target_height = $target_height - 2*$dif;
+            }
+            else
+            {
+                // Height is the greater of the two dimensions relative to the target dimensions
+                //Calculate width from height
+                $original_width = round($original_width / $original_height * $target_height);
+                $original_height = $target_height;
+                
+                $dif = round(($target_width - $original_width) / 2);
+                $padding['padleft'] = $dif;
+                $padding['padright'] = $dif;
+                
+                $target_width = $target_width - 2*$dif;
+            }
         }
         
-        return floor(($this->getPadding() / 2)) + 1;
-    }
-    
-    public function getPadding()
-    {
-        if(is_numeric($this->_padding)) {
-            return $this->_padding;
+        foreach($padding as $k=>$v) {
+            $target_padding .= " -{$k} {$v}";
         }
-        
-        $width  = $this->getMetadata()->width;
-        $height = $this->getMetadata()->height;
-        
-        $unpadded_height = round((($height * $this->getWidth()) / $width), 0);
-        $padding = ($this->getHeight() - $unpadded_height);
-        
-        return max(($this->_padding = $padding), 0);
+
+        return "-s {$target_width}x{$target_height}{$target_padding}";
     }
     
     public function getMetadata()
