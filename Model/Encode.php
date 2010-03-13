@@ -29,11 +29,9 @@ class JW_Model_Encode
         $e->setMonitorMetadata($job->toArray());
         $command = $e->getCommand();
 
-echo $command;
-
-#        $this->getAmazonSQS()->log($command);
+        $this->getAmazonSQS()->log(array('command'=>$command));
         
-        $output = exec($command);
+        popen($command, 'r');
     }
     
     public function putMedia()

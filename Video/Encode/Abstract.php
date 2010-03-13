@@ -20,6 +20,7 @@ abstract class JW_Video_Encode_Abstract
     protected $_height		= null;
     protected $_video_bitrate	= null;
     protected $_audio_bitrate	= null;
+    protected $_audio_channels	= 1;
         
     public function __construct($config)
     {
@@ -36,8 +37,8 @@ abstract class JW_Video_Encode_Abstract
             "' > {$this->getMonitorFile()};".
             "{$encoder} -v 2 -y -i {$this->getInputFile()} -async 10000 ".
             "{$this->_getEncoderSettings()} {$this->getOutputDimensions()} ".
-            "{$this->_getBitrateSettings()} {$this->getOutputFile()} ".
-            "&>>{$this->getMonitorFile()};";
+            "{$this->_getBitrateSettings()} {$this->_getAudioSettings()} {$this->getOutputFile()} ".
+            "2>> {$this->getMonitorFile()};";
         
         return $command;
     }
@@ -45,6 +46,11 @@ abstract class JW_Video_Encode_Abstract
     private function _getBitrateSettings()
     {
         return "-b {$this->getVideoBitrate()}k -ab {$this->getAudioBitrate()}k -ar 48000";
+    }
+    
+    private function _getAudioSettings()
+    {
+        return "-ac {$this->getAudioChannels()}";
     }
     
     private function _getSizeSettings()
@@ -183,6 +189,20 @@ abstract class JW_Video_Encode_Abstract
         return $this->_video_bitrate;
     }
     
+    public function setAudioChannels($channels)
+    {
+        if(!is_numeric($channels)) {
+            throw new Exception('JW_Video_Encode_Abstract::setAudioChannels(): $channels must be an integer.');
+        }
+        
+        $this->_audio_channels = (int) $channels;
+    }
+    
+    public function getAudioChannels()
+    {
+        return $this->_audio_channels;
+    }
+    
     public function setEncoderSettings($string)
     {
         $this->_settings = $string;
@@ -240,7 +260,9 @@ abstract class JW_Video_Encode_Abstract
             throw new Exception("JW_Video_Encode_Abstract::setOutputFile(): {$path} is not writeable.");
         }
         
-        $this->_output_file = "{$path}/{$filename}";
+        $filename = substr($filename, 0, strpos($filename, '.'));
+        
+        $this->_output_file = "{$path}/{$filename}.{$this->_file_extension}";
     }
     
     public function getOutputFile()
