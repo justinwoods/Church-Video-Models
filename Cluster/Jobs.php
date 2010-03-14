@@ -1,6 +1,6 @@
 <?php
 
-class JW_Video_Cluster_Jobs
+class JW_Cluster_EncodeJobs
 {
 
     private $_ec2	= null;
