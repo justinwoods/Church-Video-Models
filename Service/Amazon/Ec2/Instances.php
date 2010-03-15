@@ -38,8 +38,8 @@ class JW_Service_Amazon_Ec2_Instances
     {
         if(null === $this->_ec2) {
             $this->_ec2 = new Zend_Service_Amazon_Ec2_Instance(
-                $this->_config['amazon']['accessKeyId'],
-                $this->_config['amazon']['secretAccessKey']);
+                $this->_config->amazon->accessKeyId,
+                $this->_config->amazon->secretAccessKey);
         }
         return $this->_ec2;
     }

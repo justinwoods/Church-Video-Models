@@ -36,6 +36,18 @@ class JW_Cluster_EncodeJobs
         }
         return $jobs;
     }
+        
+    public function getJobListByField($field)
+    {
+        $jobs = $this->getJobs();
+        
+        $list = array();
+        foreach($jobs as $job) {
+            $list[] = $job['upload_id'];
+        }
+        
+        return $list;
+    }
     
     public function getServerJobs($hostname)
     {
@@ -63,6 +75,7 @@ class JW_Cluster_EncodeJobs
     {
         $jobs = $this->getJobs();
 
+        $matches = array();
         foreach($jobs as $job) {
             if($job[$key] == $value) {
                 $matches[] = $job;
