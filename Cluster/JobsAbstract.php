@@ -6,8 +6,8 @@ abstract class JW_Cluster_JobsAbstract
     private $_ec2	= null;
     private $_options	= null;
     
-    abstract $_server_group = null;
-    abstract $_job_field_name = null;
+    protected $_server_group = null;
+    protected $_job_field_name = null;
     
     public function __construct($options)
     {
@@ -43,13 +43,19 @@ abstract class JW_Cluster_JobsAbstract
     public function getJobList()
     {
         $jobs = $this->getJobs();
-        
+
         $list = array();
         foreach($jobs as $job) {
             $list[] = $job[$this->getJobFieldName()];
         }
         
         return $list;
+    }
+    
+    public function getJob($id)
+    {
+        list($job) = $this->findJobs($this->getJobFieldName(), $id);
+        return $job;
     }
     
     public function getServerJobs($hostname)
@@ -62,12 +68,12 @@ abstract class JW_Cluster_JobsAbstract
         }
         
         foreach($jobs as $job) {
-            $list[] = $this->getJob($hostname, $job);
+            $list[] = $this->getServerJob($hostname, $job);
         }
         return $list;
     }
     
-    public function getJob($hostname, $job)
+    public function getServerJob($hostname, $job)
     {
         $url = "http://{$hostname}/api/{$job}";
         $data = json_decode(file_get_contents($url));
